@@ -1,0 +1,46 @@
+---
+title: "cat_dog_split"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+image_df: the full processed image matrix with labels
+dog_images: dog images
+cat_images: cat images
+```{r cars}
+n <- 2000
+feat_n <- 28
+files <- list.files(path="../data/train", pattern=".jpg",all.files=T, full.names=T, no.. = F)
+
+labels <- read.csv("../data/train_label.txt",header = F)
+files <- mixedsort(sort(files))
+short_files <- files[1:n]
+
+#dog
+dog_files <- files[as.numeric(which(labels == "dog"))]
+
+#cat
+cat_files <- files[as.numeric(which(labels == "cat"))]
+
+
+files
+list_of_images <- lapply(short_files,readImage)
+
+dog_images <- lapply(dog_files, readImage)
+cat_images <- lapply(cat_files,readImage)
+
+clean_img <- function(x)
+{
+  return (channel(resize(x,feat_n,feat_n),"gray"))
+}
+
+processed_images <- lapply(list_of_images, clean_img)
+image_matrix <- t(do.call('cbind', lapply(processed_images,as.numeric)))
+image_df <- as.data.frame(image_matrix)
+image_df$label <- labels[1:n,1]
+
+
+```
