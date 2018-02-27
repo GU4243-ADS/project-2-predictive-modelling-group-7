@@ -50,7 +50,7 @@ train <- function(dat_train, label_train, par = NULL){
                  nround = 2,
                  nthread = 2, objective = "binary:logistic")
   
-  test.error <- sum(predict(bst, data.matrix(test[,-1])) != test[-1]/lenght(test[,1]))
+  test.error <- sum(predict(bst, data.matrix(test[,-1])) != test[-1]/length(test[,1]))
 }
   
 # max.depth: depth of tree
