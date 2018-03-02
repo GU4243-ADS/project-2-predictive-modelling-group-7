@@ -22,7 +22,8 @@ if(!require(OpenImageR)){
 library(OpenImageR)
 library(EBImage)
 
-library("dplyr")
+library(dplyr)
+library(pbapply)
 
 img_dir <- "../data/train/"
 dir_names <- list.files(img_dir)
@@ -30,16 +31,22 @@ num_files <- length(list.files(img_dir))
 
 files <- mixedsort(sort(dir_names))
 
+
+
+resized <- pbapply(imgs, function(img) {
+  resize(img, 128, 128)})
+
 # test image 1
 img0 <- readImage(paste0(img_dir,  files[1])) # change dir_names to files so images are in order pet1, pet2 instead of pet1, pet10. 
-h1 <- HOG(img0,cells = 8,orientations = 9)
+
+h1 <- HOG(img0, cells = 3, orientations = 6)
 
 # store the HOG features
 H <- matrix(NA, num_files,length(h1)) 
 
 for(i in 1:num_files){
   img <- readImage(paste0(img_dir, files[i]))
-  H[i,] <- HOG(img,cells = 8,orientations = 9)
+  H[i,] <- HOG(img,cells = 3, orientations = 6)
 }
 
 # output features
