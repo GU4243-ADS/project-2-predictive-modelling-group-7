@@ -1,0 +1,112 @@
+---
+title: "xgboost"
+author: "Nicole Smith"
+date: "3/3/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning = FALSE}
+if(!require("EBImage")){
+  source("https://bioconductor.org/biocLite.R")
+  biocLite("EBImage")
+}
+
+if(!require("gbm")){
+  install.packages("gbm")
+}
+
+library("EBImage")
+library("gbm")
+```
+
+```{r}
+experiment_dir <- "../data/" # This will be modified for different data sets.
+img_train_dir  <- paste(experiment_dir, "train/", sep = "")
+img_test_dir <- paste(experiment_dir, "test/", sep = "")
+```
+
+```{r exp_setup}
+run.cv            <- TRUE # run cross-validation on the training set
+K                 <- 5    # number of CV folds
+run.feature.train <- TRUE # process features for training set
+run.test          <- TRUE # run evaluation on an independent test set
+run.feature.test  <- TRUE # process features for test set
+seed              <- TRUE # set seed for random subset of train and test
+
+train.proportion  <- 0.75
+```
+
+```{r train_label}
+library(tidyverse)
+label <- read_csv(paste('../data/train_label.txt', sep=''),
+                   col_names = c('label'))
+
+label <-ifelse(label$label == "dog", 1, 0) # binary classification, dog = 1, cat = 0. 
+```
+
+```{r}
+n <- length(label)
+
+if(seed) {
+  set.seed(2184)
+  random.split <- sample(n, round(train.proportion*n, 1), replace = F)
+} else {
+  random.split <- sample(n, round(train.proportion*n, 1), replace = F)
+}
+```
+
+```{r}
+library(xgboost)
+hog <- read.csv("../output/hog_features.csv")
+
+hog_train <- hog[random.split, ]
+label_train <- label[random.split]
+dat_train <- xgb.DMatrix(data = as.matrix(hog_train), label = label_train)
+
+hog_test <- hog[-random.split, ]
+label_test <- label[-random.split]
+text_matrix <- xgb.DMatrix(data = as.matrix(hog_test), label = label_test)
+
+library(xgboost)
+bst = xgboost(data = dat_train, label = label_train,
+               max.depth = 3,
+               eta = .5,
+               nround = 10,
+               nthread = 2, objective = "binary:logistic")
+  
+library(dplyr)
+pred = predict(bst, dat_train)
+prediction <- matrix(pred, nrow = 3, ncol = length(pred)/3) %>% 
+  t() %>% 
+  data.frame() %>% 
+  mutate(label = label_test + 1, max_prob = max.col(., "last"))
+
+# test.error <- sum(predict(bst, data.matrix(test[,-1])) != test[-1]/length(test[,1]))
+```
+
+```{r}
+if(run.cv){
+    model_values = list()
+  k = 1
+  for (h in seq(1, 5, 1)){
+    for (i in seq(0, 1, .1)) {
+      for (j in seq(0, 100, 25)){
+        model_values[[k]] = list(max.depth = h, eta = i, nround = j)
+        k = k + 1
+    }
+  }
+}
+  
+    err_cv <- array(dim = c(length(model_values), 3))
+    for(k in length(model_values)){
+      cat("k =", k, "\n")
+      err_cv[ ,k] <- cv.function(dat_train, label_train, model_values[[k]], model, K)
+  }
+  save(err_cv, file = paste0("../output.err_cv_", model, ".RData"))
+}
+```
+
