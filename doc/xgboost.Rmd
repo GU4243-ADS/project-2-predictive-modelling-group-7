@@ -89,6 +89,8 @@ prediction <- matrix(pred, nrow = 3, ncol = length(pred)/3) %>%
 ```
 
 ```{r}
+model = xgboost
+
 if(run.cv){
     model_values = list()
   k = 1
@@ -104,7 +106,7 @@ if(run.cv){
     err_cv <- array(dim = c(length(model_values), 3))
     for(k in length(model_values)){
       cat("k =", k, "\n")
-      err_cv[ ,k] <- cv.function(dat_train, label_train, model_values[[k]], model, K)
+      err_cv[ ,k] <- xgb.cv(dat_train, label_train, model_values[[k]], model, K)
   }
   save(err_cv, file = paste0("../output.err_cv_", model, ".RData"))
 }
