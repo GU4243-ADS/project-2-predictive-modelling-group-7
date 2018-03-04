@@ -7,10 +7,10 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 library("EBImage")
 library("gtools")
-cran <- getOption("repos")
-cran["dmlc"] <- "https://s3-us-west-2.amazonaws.com/apache-mxnet/R/CRAN/"
-options(repos = cran)
-install.packages("mxnet",dependencies = T)
+#cran <- getOption("repos")
+#cran["dmlc"] <- "https://s3-us-west-2.amazonaws.com/apache-mxnet/R/CRAN/"
+#options(repos = cran)
+#install.packages("mxnet",dependencies = T)
 library(mxnet)
 library(caret)
 
@@ -18,13 +18,14 @@ library(caret)
 
 ```{r image cleanup, include=FALSE,warning = FALSE}
 
-n <- 100
+n <- 2000
 feat_n <- 28
 files <- list.files(path="../data/train", pattern=".jpg",all.files=T, full.names=T, no.. = F)
 
 labels <- read.csv("../data/train_label.txt",header = F)
 files <- mixedsort(sort(files))
 short_files <- files[1:n]
+files
 list_of_images <- lapply(short_files,readImage)
 clean_img <- function(x)
 {
@@ -41,16 +42,16 @@ image_df$label <- labels[1:n,1]
 training_index <- createDataPartition(image_df$label, p = .9, times = 1)
 training_index <- unlist(training_index)
 train_set <- image_df[training_index,]
-test_set <- image_df[-training_index,]
+test_data <- image_df[-training_index,]
 
-test_set$label
+test_data$label
 
+#train_data <- data.matrix(train_set)
 train_data <- data.matrix(train_set)
 train_x <- t(train_data[, -ncol(train_data)])
 train_y <- train_data[,ncol(train_data)]
 train_array <- train_x
 dim(train_array) <- c(feat_n, feat_n, 1, ncol(train_x))
-test_data <- data.matrix(test_set)
 test_x <- t(test_data[,-ncol(test_data)])
 test_y <- test_data[,ncol(test_data)]
 test_array <- test_x
@@ -76,48 +77,36 @@ flat <- mx.symbol.Flatten(data = pool_2)
 fcl_1 <- mx.symbol.FullyConnected(data = flat, num_hidden = 500)
 tanh_3 <- mx.symbol.Activation(data = fcl_1, act_type = "tanh")
 ## 2nd fully connected layer
-fcl_2 <- mx.symbol.FullyConnected(data = tanh_3, num_hidden = 2)
+fcl_2 <- mx.symbol.FullyConnected(data = tanh_3, num_hidden = 40)
 ## Output
 NN_model <- mx.symbol.SoftmaxOutput(data = fcl_2)
 
 ## Set seed for reproducibility
-mx.set.seed(10)
+mx.set.seed(100)
 
 ## Device used. Sadly not the GPU :-(
 device <- mx.cpu()
 
 ## Train on 1200 samples
 model <- mx.model.FeedForward.create(NN_model, X = train_array, y = train_y,
-                                     ctx = device,
-                                     num.round = 30,
-                                     array.batch.size = 100,
-                                     learning.rate = 0.05,
-                                     momentum = 0.9,
-                                     wd = 0.00001,
-                                     eval.metric = mx.metric.accuracy,
-                                     epoch.end.callback = mx.callback.log.train.metric(100))
+      ctx = device,
+      num.round = 100,
+      array.batch.size = 20,
+      learning.rate = 0.01,
+      momentum = 0.9,
+      eval.metric = mx.metric.accuracy,
+      epoch.end.callback = mx.callback.log.train.metric(100))
+
+ # Testing
+#-------------------------------------------------------------------------------
+
+# Predict labels
+predicted <- predict(model, test_array)
+
+# Assign labels
+predicted_labels <- max.col(t(predicted)) - 1
+
+# Get accuracy
+sum(predicted_labels - as.numeric(test_y) == 0)/199
+
 ```
-
-```{r}
-
-Image1 <- readImage("../data/train/pet1.jpg")
-print(Image1)
-as.numeric(Image1)
-Image2 <- readImage("../data/train/pet2.jpg")
-clean_img(Image1)
-channel(Image1,"gray")
-channel(Image2,"gray")
-
-files
-```
-
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
