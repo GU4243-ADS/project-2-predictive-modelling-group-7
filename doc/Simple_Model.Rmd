@@ -4,7 +4,7 @@ author: "MaoGuan"
 date: "2018年3月1日"
 output: html_document
 ---
-#  Use four different models: Linear SVM, RBF SVM, RandomForest, and Multi-Layer-Perceptron and do the cross-validation 
+##  Use Six different models: Linear SVM, RBF SVM, RandomForest, Multi-Layer-Perceptron, KNN and Logistic Regression and do the cross-validation 
 ```{r engine = 'python'}
 import numpy as np
 import pandas as pd
