@@ -24,6 +24,7 @@ Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by
 Classifier\Features | SIFT | HOG
 ---- | --- | ---
 Gradient Boosting(Baseline) | Accuracy:|  Accuracy:
+CNN | Accuracy:|  Accuracy:
 XGBoost | Accuracy:|  Accuracy:
 Random Forest |  Accuracy: 72% | Accuracy: 64% 
 SVM(Linear) | Accuracy: 67% | Accuracy: 67%
