@@ -18,25 +18,29 @@ if(!require(OpenImageR)){
 ```
 
 ```{r }
-library(EBImage)
 library(OpenImageR)
-library(dplyr)
-library(pbapply)
+library(EBImage)
+
+library("dplyr")
 
 img_dir <- "../data/train/"
-num_files <- length(list.files(img_dir))
 dir_names <- list.files(img_dir)
-files <- mixedsort(sort(dir_names))
+num_files <- length(list.files(img_dir))
 
-# Use Matrix M to store the HOG features
-M <- matrix(NA, num_files,length(h1)) 
+# test image 1
+img0 <- readImage(paste0(img_dir,  dir_names[1]))
+h1 <- HOG(img0,cells = 8,orientations = 9)
+
+
+# store the HOG features
+H <- matrix(NA, num_files,length(h1)) 
 
 for(i in 1:num_files){
-  img <- readImage(paste0(img_dir, files[i]))
-  M[i,] <- HOG(img,cells = 3, orientations = 6)
+  img <- readImage(paste0(img_dir, dir_names[i]))
+  H[i,] <- HOG(img,cells = 8,orientations = 9)
 }
 
-# output the features
-write.csv(M, file = "../output/hog_features.csv",row.names = F)
+# output features
+write.csv(H, file = "../output/hog_features.csv",row.names = F)
 ```
 
