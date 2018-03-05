@@ -1,0 +1,58 @@
+---
+title: "SIFT"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("cluster")
+library("reshape2")
+library("flexclust")
+library("gtools")
+```
+
+```{r feats}
+#source("../lib/feature.R")
+#sift_features.init("../data/train-features")
+load_pet <- function(fname)
+{
+  return (get(load(fname)[2]))
+}
+load_featnames <- function(fname)
+{
+  num_feats <- nrow(get(load(fname)[1]))
+  
+  return (rep(fname,num_feats))
+}
+file_names <- list.files(path="../data/train-features", pattern=".jpg.sift.Rdata",all.files=T, full.names=T, no.. = F)
+file_names <- mixedsort(sort(file_names))
+
+
+#feat_lab <- feature_label("../data/train-features/pet999.jpg.sift.Rdata")
+tm_load <- system.time(pets <- lapply(file_names, load_pet))
+names_list <- unlist(lapply(file_names, load_featnames))
+
+pets_matrix <- do.call("rbind",pets)
+
+cluster_size <- 10
+system.time(clustered_sift_features <- kmeans(pets_matrix,100,iter.max = 100, algorithm="MacQueen"))
+save(clustered_sift_features, file = "../output/sift_kmeans.Rdata")
+tester$centers
+tm_feature_extraction <- system.time(clustered_sift_features <-clara(pets_matrix,cluster_size,samples = 5))
+
+clust_model <- kcca(clustered_sift_features,pets_matrix)
+preds <- clust_model.predict(pets_matrix)
+clustered_sift_features$medoids
+paste("feature extraction time (s): ", tm_feature_extraction[1])
+
+labels <- data.frame(name = names_list, cluster = clustered_sift_features$cluster)
+
+output <- dcast(labels,name~cluster)
+
+output$name = as.character(output$name)
+output_ordered <- output[mixedorder(output$name),]
+rownames(output_ordered) <- NULL
+
+sift_features <- apply(output_ordered[,-1], 2, function(i) i/sum(i))
+write.csv(sift_features, file = "../output/sift_features.csv", row.names = FALSE)
+```
