@@ -25,7 +25,7 @@ Classifier\Features | SIFT | HOG
 ---- | --- | ---
 Gradient Boosting(Baseline) | Accuracy:|  Accuracy:
 CNN | Accuracy:|  Accuracy: 68%
-XGBoost | Accuracy:|  Accuracy:
+XGBoost | Accuracy:68%|  Accuracy:74%
 Random Forest |  Accuracy: 72% | Accuracy: 64% 
 SVM(Linear) | Accuracy: 67% | Accuracy: 67%
 SVM(RBF) | Accuracy: 67% | Accuracy: 67%
