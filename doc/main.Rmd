@@ -21,7 +21,7 @@ if(!require("EBImage")){
 ```{r}
 
 #Select One
-test.set <- FALSE
+# test.set <- FALSE
 test.set <- TRUE
 
 ```
@@ -37,7 +37,8 @@ library(dplyr)
 library(pbapply)
 library(gtools)
 
-img_dir <- "../data/train/"
+
+img_dir <- "../data/pets/train/" # change for test set
 dir_names <- list.files(img_dir)
 num_files <- length(list.files(img_dir))
 
@@ -64,12 +65,6 @@ write.csv(H, file = "../output/hog_features.csv",row.names = F)
 #Label Data
 
 ```{r}
-experiment_dir <- "../data/" # This will be modified for different data sets.
-img_train_dir  <- paste(experiment_dir, "train/", sep = "")
-img_test_dir <- paste(experiment_dir, "test/", sep = "")
-```
-
-```{r}
 
 library(tidyverse)
 label <- read_csv(paste('../data/train_label.txt', sep=''),
@@ -89,45 +84,65 @@ hog <- read.csv("../output/hog_features.csv")
 #Add Labels
 hog$label <- label
 
-# Splitting the dataset into the Training set and Test set
+# Splitting the dataset into the Training set and Test set to validate
 # install.packages('caTools')
 
 if (test.set == FALSE) {
   library(caTools)
   set.seed(123)
-  
+
   split = sample.split(hog$label, SplitRatio = 0.8)
   training_set = subset(hog, split == TRUE)
   test_set = subset(hog, split == FALSE)
-  
+
   library(xgboost)
-  tm_train<- system.time(bst <- xgboost(data = as.matrix(training_set[-55]), 
+  tm_train<- system.time(bst <- xgboost(data = as.matrix(training_set[-55]),
                  label = training_set$label,
                  max.depth = 3,
                  eta = .5,
                  nround = 20,
                  nthread = 2, objective = "binary:logistic"))
-  
-  # Predicting the Test set results
-  tm_test <- system.time(y_pred <- predict(bst, newdata = as.matrix(test_set[-55])))
-  y_pred <- (y_pred >= 0.5) } 
 
-####Testing only on test set 
-
-if (test.set == TRUE) {
-  test_set <- hog
-  
-  library(xgboost)
-  tm_train<- system.time(bst <- xgboost(data = as.matrix(training_set[-55]), 
-                 label = training_set$label,
-                 max.depth = 3,
-                 eta = .5,
-                 nround = 20,
-                 nthread = 2, objective = "binary:logistic"))
-  
   # Predicting the Test set results
   tm_test <- system.time(y_pred <- predict(bst, newdata = as.matrix(test_set[-55])))
   y_pred <- (y_pred >= 0.5) }
+
+```
+
+```{r}
+
+###Training on all the data to save the final model
+if (test.set == FALSE) {
+  library(xgboost)
+  tm_train<- system.time(bst <- xgboost(data = as.matrix(hog[-55]),
+                 label = hog$label,
+                 max.depth = 3,
+                 eta = .5,
+                 nround = 20,
+                 nthread = 2, objective = "binary:logistic"))
+  
+  # Predicting the Test set results
+  tm_test <- system.time(y_pred <- predict(bst, newdata = as.matrix(test_set[-55])))
+  y_pred <- (y_pred >= 0.5)
+
+saveRDS(bst, "./xgboost_model.rds")}
+  
+
+```
+
+```{r}
+####Testing only on test set 
+
+if (test.set == TRUE) {
+  bst <- readRDS("./xgboost_model.rds")
+  test_set <- hog
+  test_set$label <- label
+  
+  # Predicting the Test set results
+  tm_test <- system.time(y_pred <- predict(bst, newdata = as.matrix(test_set[-55])))
+  y_pred <- (y_pred >= 0.5) 
+  cm = table(test_set[, 55], y_pred)
+  accuracy = (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] + cm[1,2] + cm[2,1])}
 
 
 ```
@@ -136,29 +151,30 @@ if (test.set == TRUE) {
 
 ```{r}
 
-# Making the Confusion Matrix
-cm = table(test_set[, 55], y_pred)
-
-# Applying k-Fold Cross Validation
-# install.packages('caret')
-library(caret)
-folds = createFolds(training_set$label, k = 10)
-cv = lapply(folds, function(x) {
-  training_fold = training_set[-x, ]
-  test_fold = training_set[x, ]
-  bst = xgboost(data = as.matrix(training_fold[-55]), 
-               label = training_fold$label,
-               max.depth = 3,
-               eta = .5,
-               nround = 20,
-               nthread = 2, objective = "binary:logistic")
-  y_pred = predict(bst, newdata = as.matrix(test_fold[-55]))
-  y_pred = (y_pred >= 0.5)
-  cm = table(test_fold[, 55], y_pred)
-  accuracy = (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] + cm[1,2] + cm[2,1])
-  return(accuracy)
-})
-accuracy = mean(as.numeric(cv))
+if (test.set == FALSE) {
+  # Making the Confusion Matrix
+  cm = table(test_set[, 55], y_pred)
+  
+  # Applying k-Fold Cross Validation
+  # install.packages('caret')
+  library(caret)
+  folds = createFolds(training_set$label, k = 10)
+  cv = lapply(folds, function(x) {
+    training_fold = training_set[-x, ]
+    test_fold = training_set[x, ]
+    bst = xgboost(data = as.matrix(training_fold[-55]), 
+                 label = training_fold$label,
+                 max.depth = 3,
+                 eta = .5,
+                 nround = 20,
+                 nthread = 2, objective = "binary:logistic")
+    y_pred = predict(bst, newdata = as.matrix(test_fold[-55]))
+    y_pred = (y_pred >= 0.5)
+    cm = table(test_fold[, 55], y_pred)
+    accuracy = (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] + cm[1,2] + cm[2,1])
+    return(accuracy)
+  })
+  accuracy = mean(as.numeric(cv)) }
 
 ```
 
@@ -167,7 +183,10 @@ accuracy = mean(as.numeric(cv))
 ```{r}
 
 cat("Time for constructing training features=", tm_feature_train[1], "s \n")
-cat("Time for training model=", tm_train[1], "s \n")
+
+if (test.set == FALSE) {
+  cat("Time for training model=", tm_train[1], "s \n") }
+
 cat("Time for making prediction=", tm_test[1], "s \n")
 
 ```
