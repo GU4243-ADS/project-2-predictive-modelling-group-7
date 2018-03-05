@@ -116,6 +116,7 @@ cv = lapply(folds, function(x) {
 })
 accuracy = mean(as.numeric(cv))
 ```
+
 ```{r}
 accuracy
 ```
@@ -130,22 +131,25 @@ folds_sift = createFolds(training_sift$label, k = 10)
 cv_sift = lapply(folds_sift, function(x) {
   training_fold_sift = training_sift[-x, ]
   test_fold_sift = training_sift[x, ]
-  gbm_sift = gbm.fit(x = training_sift[-100],
-                                  y = label_sift, 
+  gbm_sift <- gbm.fit(x = training_fold_sift[-100],
+                                  y = training_fold_sift$label, 
                                   n.trees = 1000,
                                   distribution = "bernoulli",
                                   interaction.depth = 3,
                                   bag.fraction = 0.5,
                                   verbose = FALSE)
 
-  pred_sift = predict(gbm_sift, newdata = test_fold_sift[-55], n.trees = 1, 
-                   distribution = "bernoulli", interaction.depth = 3)
+  pred_sift = predict(gbm_sift, newdata = test_fold_sift[-100], n.trees = 1000)
   pred_sift = (pred_sift >= 0.5)
   cm_sift = table(test_fold_sift[, 55], pred_sift)
-  accuracy = (cm_sift[1,1] + cm_sift[2,2]) / (cm_sift[1,1] + cm_sift[2,2] + cm_sift[1,2] + cm[2,1])
+  accuracy_sift = (cm_sift[1,1] + cm_sift[2,2]) / (cm_sift[1,1] + cm_sift[2,2] + cm_sift[1,2] + cm[2,1])
   return(accuracy_sift)
 })
 accuracy_sift = mean(as.numeric(cv_sift))
+```
+
+```{r}
+accuracy_sift
 ```
 
 

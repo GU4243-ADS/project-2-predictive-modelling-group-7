@@ -21,13 +21,8 @@ gbm.cv.f <- function(X.train, y.train, d, K) {
     test.label  <- y.train[101][s == i]
     
     par  <- list(depth = d)
-    gbm_fit  <- gbm_train(dat_train, label_train,
-                        n.trees = 1000,
-                        distribution = "bernoulli",
-                        interaction.depth = 3,
-                        bag.fraction = 0.5,
-                        verbose = FALSE)
-    pred <- test(gbm_fit, test.data)
+    gbm_fit  <- gbm_train(dat_train, label_train)
+    pred <- gbm_test(gbm_fit, test.data)
     cv.error[i] <- mean(pred != test.label)  
     
   }			
