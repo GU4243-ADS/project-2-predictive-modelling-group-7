@@ -86,22 +86,22 @@ mx.set.seed(100)
 
 ## Device used. Sadly not the GPU :-(
 device <- mx.cpu()
-
+object.size(model)
 ## Train on 1200 samples
-model <- mx.model.FeedForward.create(NN_model, X = train_array, y = train_y,
+tm_train <- system.time(model <- mx.model.FeedForward.create(NN_model, X = train_array, y = train_y,
       ctx = device,
       num.round = 100,
-      array.batch.size = 20,
+      array.batch.size = 40,
       learning.rate = 0.01,
       momentum = 0.9,
       eval.metric = mx.metric.accuracy,
-      epoch.end.callback = mx.callback.log.train.metric(100))
+      epoch.end.callback = mx.callback.log.train.metric(100)))
 
  # Testing
 #-------------------------------------------------------------------------------
 
 # Predict labels
-predicted <- predict(model, test_array)
+tm_test <- system.time(predicted <- predict(model, test_array))
 
 # Assign labels
 predicted_labels <- max.col(t(predicted)) - 1
@@ -109,4 +109,6 @@ predicted_labels <- max.col(t(predicted)) - 1
 # Get accuracy
 sum(predicted_labels - as.numeric(test_y) == 0)/199
 
+tm_test
+tm_train
 ```
