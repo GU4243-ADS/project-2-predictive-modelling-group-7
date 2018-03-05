@@ -1,10 +1,9 @@
 # Spring2018
-
+<img src="https://phz8.petinsurance.com/-/media/all-phz-images/2016-images-850/dogscatssnuggling850.jpg" alt="GitHub" title="Dogs and Cats" width="500" height="300" />
 
 # Project 2: Predictive Modelling
 
 ----
-<img src="https://phz8.petinsurance.com/-/media/all-phz-images/2016-images-850/dogscatssnuggling850.jpg" alt="GitHub" title="Dogs and Cats" width="400" height="300" />
 ### [Project Description](doc/)
 
 Term: Spring 2018
