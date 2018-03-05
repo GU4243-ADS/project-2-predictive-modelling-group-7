@@ -85,13 +85,13 @@ print ("Running time of LR is ",end-start)
 print("Accuracy of the LR  predicter: %0.2f (+/- %0.2f)" % (scores_lr.mean(), scores_lr.std() * 2))
 
 
-
 import matplotlib.pyplot as plt  
-plt.bar(range(7), [scores_lin.mean(),scores_rbf.mean(),scores_rf.mean(),scores_mlp.mean(),scores_knn.mean(),scores_lr.mean(),scores_dbt.mean()],width = 0.5, tick_label = ['Linear_SVM','RBF_SVM', 'Random Forest', 'MLP','KNN-5','Logistic Regression','Adaboost' ])
+plt.bar(range(6), [scores_lin.mean(),scores_rbf.mean(),scores_rf.mean(),scores_mlp.mean(),scores_knn.mean(),scores_lr.mean()],width = 0.5, tick_label = ['Linear_SVM','RBF_SVM', 'Random Forest', 'MLP','KNN-5','Logistic Regression' ])
 plt.title("Average Accuracy of Simple Models")
-value = [scores_lin.mean(),scores_rbf.mean(),scores_rf.mean(),scores_mlp.mean(),scores_knn.mean(),scores_lr.mean(),scores_dbt.mean()]
-for i in range(7):
+value = [scores_lin.mean(),scores_rbf.mean(),scores_rf.mean(),scores_mlp.mean(),scores_knn.mean(),scores_lr.mean()]
+for i in range(6):
     plt.text(i,value[i], '%f'%value[i], ha = 'center', va = 'bottom', fontsize = 7)
 plt.savefig('../output/Simple_model_results_sift.jpg')
+
 ```
 
