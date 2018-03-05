@@ -41,13 +41,18 @@ library(caTools)
 set.seed(123)
 split = sample.split(hog$label, SplitRatio = 0.8)
 training_set = subset(hog, split == TRUE)
+label_set = subset(hog$label, split == TRUE)
 test_set = subset(hog, split == FALSE)
 
 library(gbm)
-tm_train<- system.time(bst <- gbm(data = as.matrix(training_set[-55]))
+tm_train<- system.time(gbm_train <- gbm.fit(x = training_set[-55],
+                                  y = label_set, 
+                                  n.trees = 2000,
+                                  distribution = "bernoulli",
+                                  interaction.depth = 3))
 
 # Predicting the Test set results
-tm_test <- system.time(y_pred <- predict(bst, newdata = as.matrix(test_set[-55])))
+tm_test <- system.time(y_pred <- predict(gbm_train, newdata = as.matrix(test_set[-55])))
 y_pred <- (y_pred >= 0.5)
 
 ```

@@ -9,7 +9,7 @@ output:
 ## Load libraries necessary
 
 ```{r, warning = FALSE}
-list.of.packages <- c("EBImage", "OpenImageR", "gbm", "dplyr", "pbapply", "xgboost")
+list.of.packages <- c("EBImage", "OpenImageR", "gbm", "dplyr", "pbapply", "xgboost", "gtools", "tidyverse")
 
 
 packages.needed=setdiff(list.of.packages, 
@@ -24,7 +24,8 @@ if(!require("EBImage")){
   biocLite("EBImage")
 }
 
-
+library(gtools)
+library(tidyverse)
 library(EBImage)
 library(OpenImageR)
 library(gbm)
@@ -93,7 +94,7 @@ For this simple example, we use the row averages of raw pixel values as the visu
 `feature.R` should be the wrapper for all your feature engineering functions and options. The function `feature( )` should have options that correspond to different scenarios for your project and produces an R object that contains features that are required by all the models you are going to evaluate later. 
 
 ```{r sift_feature}
-sift_train_feature <- read.csv(paste0('../output/sift_features.csv', sep = ''))
+sift_train <- read.csv(paste0('../output/sift_features.csv', sep = ''))
 ```
 
 
@@ -167,22 +168,11 @@ if(run.cv){
 }
 ```
 
-* Choose the "best" parameter value
-
-```{r best_model}
-model_best <- model_values[1]
-if(run.cv){
-  model_best <- model_values[which.min(err_cv[, 1])]
-}
-
-par_best <- list(depth = model_best)
-```
-
-* Train the model with the entire training set using the selected model (in this case, model parameter) via cross-validation.
 
 ```{r final_train}
 tm_train <- NA
-tm_train <- system.time(fit_train <- train(dat_train, label_train, par_best))
+tm_train <- system.time(fit_train <- train(dat_train, label_train))
+
 save(fit_train, file = "../output/fit_train.RData")
 ```
 
