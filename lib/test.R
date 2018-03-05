@@ -9,10 +9,8 @@
 gbm_test <- function(fit_train, dat_test){
   library(gbm)
   pred <- predict(fit_train$fit, newdata = dat_test, 
-                  n.trees = fit_train$iter, type = "response")
-  pred <- data.frame(pred[,,1])
-  colnames(pred) <- c('0','1','2')
-  pred_label <- apply(pred,1,function(x){return(which.max(x)-1)})
+                  n.trees = gbm_sift$iter, type="response")
+  pred_label <- round(pred)
   return(pred_label)
 }
 
