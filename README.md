@@ -23,6 +23,16 @@ Contribution statement: [default](doc/a_note_on_contributions.md) All team membe
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is organized as follows.
 
+Classifier\Features | SIFT | HOG
+---- | --- | ---
+Gradient Boosting(Baseline) | Accuracy:|  Accuracy:
+XGBoost | Accuracy:|  Accuracy:
+Random Forest |  Accuracy: | Accuracy:64% 
+SVM(Linear) | Accuracy: | Accuracy: 67%
+SVM(RBF) | Accuracy: | Accuracy: 67%
+Logistic Regression | Accuracy: | Accuracy:67% 
+kNN | Accuracy: | Accuracy:60%
+Multi-Layer-Perceptron| Accuracy: | Accuracy:67%
 ```
 proj/
 ├── lib/
