@@ -4,7 +4,7 @@
 # Project 2: Predictive Modelling
 
 ----
-
+![GitHub](https://phz8.petinsurance.com/-/media/all-phz-images/2016-images-850/dogscatssnuggling850.jpg)
 
 ### [Project Description](doc/)
 
