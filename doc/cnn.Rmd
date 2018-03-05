@@ -21,7 +21,7 @@ library(caret)
 n <- 2000
 feat_n <- 28
 files <- list.files(path="../data/train", pattern=".jpg",all.files=T, full.names=T, no.. = F)
-
+files
 labels <- read.csv("../data/train_label.txt",header = F)
 files <- mixedsort(sort(files))
 short_files <- files[1:n]
