@@ -9,21 +9,28 @@ output:
 ## Load libraries necessary
 
 ```{r, warning = FALSE}
+list.of.packages <- c("EBImage", "OpenImageR", "gbm", "dplyr", "pbapply", "xgboost")
+
+
+packages.needed=setdiff(list.of.packages, 
+                        intersect(installed.packages()[,1], 
+                                  list.of.packages))
+if(length(packages.needed)>0){
+  install.packages(packages.needed, dependencies = TRUE)
+}
+
 if(!require("EBImage")){
   source("https://bioconductor.org/biocLite.R")
   biocLite("EBImage")
 }
 
-if(!require("gbm")){
-  install.packages("gbm")
-}
 
 library(EBImage)
 library(OpenImageR)
 library(gbm)
 library(dplyr)
 library(pbapply)
-library(tidyverse)
+library(xgboost)
 ```
 
 ### Step 0: Specify directories.
@@ -56,6 +63,7 @@ In this step, we have a set of controls for the model evaluation.  The code in t
 run.cv            <- TRUE # run cross-validation on the training set
 K                 <- 5    # number of CV folds
 run.feature.train <- TRUE # process features for training set
+run.train         <- FALSE
 run.test          <- FALSE # run evaluation on an independent test set
 run.feature.test  <- FALSE # process features for test set
 ```
@@ -75,7 +83,7 @@ For the example of zip code digits, we code digit 9 as "1" and digit 7 as "0" fo
 label_train <- read_csv(paste('../data/train_label.txt', sep=''),
                    col_names = c('label'))
 
-label_train <- ifelse(label_train$labelM == "dog", 1, 0) # binary classification, dog = 1, cat = 0. 
+label_train <- ifelse(label_train$label == "dog", 1, 0) # binary classification, dog = 1, cat = 0. 
 ```
 
 ### Step 3: Construct visual features
@@ -84,7 +92,12 @@ For this simple example, we use the row averages of raw pixel values as the visu
 
 `feature.R` should be the wrapper for all your feature engineering functions and options. The function `feature( )` should have options that correspond to different scenarios for your project and produces an R object that contains features that are required by all the models you are going to evaluate later. 
 
-```{r hog feature}
+```{r sift_feature}
+sift_train_feature <- read.csv(paste0('../output/sift_features.csv', sep = ''))
+```
+
+
+```{r hog_feature}
 source("../lib/feature.hog.R")
 
 tm_feature_train <- NA
