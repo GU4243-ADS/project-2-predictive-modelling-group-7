@@ -16,13 +16,13 @@ gbm.cv.f <- function(X.train, y.train, d, K) {
   
   for (i in 1:K){
     train.data  <- X.train[s != i,]
-    train.label <- y.train$label[s != i]
+    train.label <- as.data.frame(y.train$label)[s != i]
     test.data   <- X.train[s == i,]
-    test.label  <- y.train$label[s == i]
+    test.label  <- as.data.frame(y.train$label)[s == i]
     
     par  <- list(depth = d)
-    fit  <- gbm_train(dat_train, label_train)
-    pred <- test(fit, test.data)  
+    gbm_fit  <- gbm_train(dat_train, label_train)
+    pred <- test(gbm_fit, test.data)
     cv.error[i] <- mean(pred != test.label)  
     
   }			
@@ -30,7 +30,7 @@ gbm.cv.f <- function(X.train, y.train, d, K) {
 }
 
 
-xgb.cv.f <- function(train_df, train_label, max.depth=3, nround=100,K=K_folds){
+xgb.cv.f <- function(train_df, train_label,max.depth=5, nround=100,K=K_folds){
     
     n <- dim(train_df)[1]
     n.fold <- floor(n/K)
@@ -43,19 +43,17 @@ xgb.cv.f <- function(train_df, train_label, max.depth=3, nround=100,K=K_folds){
         test.data <- train_df[s == i,]
         test.label <- train_label[s == i]
         
-        max.depth <- max.depth
-        nround <- nround
+        
+        xgb_fit <- xgboost(data = data.matrix(train.data),
+        label = train.label,
+        max.depth = 3,
+        eta = 0.5,
+        nround = 10,
+        nthread = 2,
+        objective = "binary:logistic")
         
         
-        fit <- xgb_train(dat_train, label_train,
-                            max.depth = 3,
-                            eta = 0.5,
-                            nround = 20,
-                            nthread = 2,
-                            objective = "binary:logistic")
-        
-        
-        pred_label <- predict(fit, data.matrix(test.data))
+        pred_label <- predict(xgb_fit, data.matrix(test.data))
         cv.error[i] <- mean(pred_label != test.label)
         
     }
