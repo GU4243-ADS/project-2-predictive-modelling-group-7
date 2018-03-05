@@ -9,7 +9,7 @@ output:
 ## Load libraries necessary
 
 ```{r, warning = FALSE}
-list.of.packages <- c("EBImage", "OpenImageR", "gbm", "dplyr", "pbapply", "xgboost")
+list.of.packages <- c("EBImage", "OpenImageR", "gbm", "dplyr", "pbapply", "xgboost", "gtools", "tidyverse")
 
 
 packages.needed=setdiff(list.of.packages, 
@@ -24,7 +24,8 @@ if(!require("EBImage")){
   biocLite("EBImage")
 }
 
-
+library(gtools)
+library(tidyverse)
 library(EBImage)
 library(OpenImageR)
 library(gbm)
@@ -38,7 +39,7 @@ library(xgboost)
 We first set the working directory to the location of this .Rmd file  (it should be in a project folder). Then we specify our training and testing data. If you do not have an independent test set, you need to create your own testing data by random subsampling from the training data (we haven't done this here), and in order to obain reproducible results, you should use `set.seed()` whenever randomization is used. 
 
 ```{r wkdir, eval=FALSE}
-setwd("Spring2018/Project_Starter_Codes/Project2-PredictiveModelling/doc") 
+setwd('.') 
 # Replace the above with your own path or manually set it in RStudio to where this rmd file is located. 
 ```
 
@@ -92,22 +93,20 @@ For this simple example, we use the row averages of raw pixel values as the visu
 
 `feature.R` should be the wrapper for all your feature engineering functions and options. The function `feature( )` should have options that correspond to different scenarios for your project and produces an R object that contains features that are required by all the models you are going to evaluate later. 
 
-```{r sift_feature}
-sift_train_feature <- read.csv(paste0('../output/sift_features.csv', sep = ''))
-```
 
-
-```{r hog_feature}
+```{r features}
 source("../lib/feature.hog.R")
 
 tm_feature_train <- NA
 if(run.feature.train){
   tm_feature_train <- system.time(dat_train <- feature.hog(img_train_dir, export = TRUE))
+  sift_train <- read.csv(paste0('../output/sift_features.csv', sep = ''))
 }
 
 tm_feature_test <- NA
 if(run.feature.test){
   tm_feature_test <- system.time(dat_test <- feature.hog(img_test_dir, export = TRUE))
+  sift_test <- read.csv(paste0('../output/sift_test.csv', sep = ''))
 }
 
 
@@ -145,7 +144,7 @@ if(run.cv){
   err_cv <- array(dim = c(length(model_values), 2))
   for(k in 1:length(model_values)){
     cat("k=", k, "\n")
-    err_cv[k,] <- cv.function(dat_train, label_train, model_values[k], K)
+    err_cv[k,] <- gbm.cv.f(dat_train, label_train, model_values[k], K)
   }
   save(err_cv, file = "../output/err_cv.RData")
 }
@@ -167,23 +166,16 @@ if(run.cv){
 }
 ```
 
-* Choose the "best" parameter value
-
-```{r best_model}
-model_best <- model_values[1]
-if(run.cv){
-  model_best <- model_values[which.min(err_cv[, 1])]
-}
-
-par_best <- list(depth = model_best)
-```
-
-* Train the model with the entire training set using the selected model (in this case, model parameter) via cross-validation.
 
 ```{r final_train}
-tm_train <- NA
-tm_train <- system.time(fit_train <- train(dat_train, label_train, par_best))
-save(fit_train, file = "../output/fit_train.RData")
+tm_train_gbm <- NA
+tm_train_gbm <- system.time(fit_gbm <- gbm_train(dat_train, label_train))
+save(fit_gbm, file = "../output/fit_gbm.RData")
+
+
+tm_train_xgb <- NA
+tm_train_xgb <- system.time(fit_xgb <- xgb_train(dat_train, label_train))
+save(fit_xgb, file = "../output/fit_xgb.RData")
 ```
 
 ### Step 5: Make prediction 
@@ -191,12 +183,20 @@ save(fit_train, file = "../output/fit_train.RData")
 Feed the final training model with the test data.  (Note that for this to truly be 'test' data, it should have had no part of the training procedure used above.) 
 
 ```{r test}
-tm_test <- NA
+tm_test_gbm <- NA
 if(run.test){
-  load(file = paste0("../output/feature_", "zip", "_", "test", ".RData"))
-  load(file = "../output/fit_train.RData")
-  tm_test <- system.time(pred_test <- test(fit_train, dat_test))
-  save(pred_test, file = "../output/pred_test.RData")
+  load(file = paste0("../output/", "HOG", ".RData"))
+  load(file = "../output/fit_gbm.RData")
+  tm_test <- system.time(pred_test_gbm <- test(fit_gbm, dat_test))
+  save(pred_test_gbm, file = "../output/pred_test_gbm.RData")
+}
+
+tm_test_xgb <- NA
+if(run.test){
+  load(file = paste0("../output/", "HOG", ".RData"))
+  load(file = "../output/fit_xgb.RData")
+  tm_test <- system.time(pred_test_xgb <- test(fit_xgb, dat_test))
+  save(pred_test_xgb, file = "../output/pred_test_xgb.RData")
 }
 ```
 
@@ -207,6 +207,8 @@ Prediction performance matters, so does the running times for constructing featu
 ```{r running_time}
 cat("Time for constructing training features=", tm_feature_train[1], "s \n")
 cat("Time for constructing testing features=", tm_feature_test[1], "s \n")
-cat("Time for training model=", tm_train[1], "s \n")
-cat("Time for making prediction=", tm_test[1], "s \n")
+cat("Time for training model=", tm_train_gbm[1], "s \n")
+cat("Time for training model=", tm_train_xgb[1], "s \n")
+cat("Time for making prediction=", tm_test_gbm[1], "s \n")
+cat("Time for making prediction=", tm_test_xgb[1], "s \n")
 ```

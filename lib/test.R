@@ -17,7 +17,7 @@ gbm_test <- function(fit_train, dat_test){
 }
 
 xgb_test <- function(model, dat_test, label_test){
-    ibrary(xgboost)
+    library(xgboost)
     
     pred_label <- predict(model, data.matrix(dat_test))
     return(pred_label)
