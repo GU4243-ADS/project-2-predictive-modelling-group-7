@@ -38,7 +38,7 @@ library(pbapply)
 library(gtools)
 
 
-img_dir <- "../data/pets/train/" # change for test set
+img_dir <- "../data/test/" # change for test set
 dir_names <- list.files(img_dir)
 num_files <- length(list.files(img_dir))
 
@@ -58,7 +58,7 @@ tm_feature_train <- system.time(for(i in 1:num_files){
 })
 
 # output features
-write.csv(H, file = "../output/hog_features.csv",row.names = F)
+write.csv(H, file = "../output/hog_test.csv",row.names = F)
 
 ```
 
@@ -76,9 +76,9 @@ label <-ifelse(label$label == "dog", 1, 0) # binary classification, dog = 1, cat
 ###Training and Testing Baseline Model (GBM)
 ```{r}
 
-if (test.set == FALSE) {
+if (test.set) {
   library(gbm)
-  sift <- read.csv("../output/sift_features.csv")
+  sift <- read.csv("../output/sift_test.csv")
 
   # sift <- read.csv("../pets/train-features")
 
@@ -123,7 +123,7 @@ hog$label <- label
 # Splitting the dataset into the Training set and Test set to validate
 # install.packages('caTools')
 
-if (test.set == FALSE) {
+if (test.set == TRUE) {
   library(caTools)
   set.seed(123)
 
@@ -161,7 +161,7 @@ if (test.set == FALSE) {
   tm_test <- system.time(y_pred <- predict(bst, newdata = as.matrix(test_set[-55])))
   y_pred <- (y_pred >= 0.5)
 
-saveRDS(bst, "../output/xgboost_model.rds")}
+saveRDS(bst, "./xgboost_model.rds")}
   
 
 ```
@@ -170,17 +170,17 @@ saveRDS(bst, "../output/xgboost_model.rds")}
 ####Testing only on test set 
 
 if (test.set == TRUE) {
-  bst <- readRDS("../output/xgboost_model.rds")
-  test_set <- hog
-  test_set$label <- label
+  bst <- readRDS("../doc/xgboost_model.rds")
+  test_set <- read.csv("../output/hog_test.csv")
   
   # Predicting the Test set results
-  tm_test <- system.time(y_pred <- predict(bst, newdata = as.matrix(test_set[-55])))
+  tm_test <- system.time(y_pred <- predict(bst, newdata = as.matrix(test_set[-54])))
   y_pred <- (y_pred >= 0.5) 
-  cm = table(test_set[, 55], y_pred)
+  cm = table(test_set[, 54], y_pred)
   accuracy = (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] + cm[1,2] + cm[2,1])}
 
-
+doggos <- ifelse(y_pred == TRUE, "dog", "cat")
+write.table(doggos, "../output/hog_xgboost_predictions.csv", col.names = FALSE, row.names = FALSE)
 ```
 
 ###Validating results - Skip if testing
