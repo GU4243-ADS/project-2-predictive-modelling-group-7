@@ -44,7 +44,6 @@ training_set = subset(hog, split == TRUE)
 label_set = subset(hog$label, split == TRUE)
 test_set = subset(hog, split == FALSE)
 
-library(gbm)
 tm_train<- system.time(gbm_train <- gbm.fit(x = training_set[-55],
                                   y = label_set, 
                                   n.trees = 2000,
@@ -53,6 +52,36 @@ tm_train<- system.time(gbm_train <- gbm.fit(x = training_set[-55],
 
 # Predicting the Test set results
 gbm.pred <- predict(gbm_train, newdata = test_set[-55], n.trees = 1, distribution = "bernoulli", interaction.depth = 3)
+mean(gbm.pred)
+```
+
+
+```{r}
+library(gbm)
+sift <- read.csv("../output/sift_features.csv")
+
+# sift <- read.csv("../pets/train-features")
+
+sift$label <- label
+
+# Splitting the dataset into the Training set and Test set
+# install.packages('caTools')
+library(caTools)
+set.seed(123)
+split = sample.split(sift$label, SplitRatio = 0.8)
+training_sift = subset(sift, split == TRUE)
+label_sift = subset(sift$label, split == TRUE)
+test_sift = subset(sift, split == FALSE)
+
+library(gbm)
+tm_train<- system.time(gbm_train <- gbm.fit(x = training_sift[-100],
+                                  y = label_sift, 
+                                  n.trees = 1000,
+                                  distribution = "bernoulli",
+                                  interaction.depth = 3))
+
+# Predicting the Test set results
+gbm.pred <- predict(gbm_train, newdata = test_sift[-100], n.trees = 1, distribution = "bernoulli", interaction.depth = 3)
 mean(gbm.pred)
 ```
 
