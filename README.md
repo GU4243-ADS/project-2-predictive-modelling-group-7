@@ -12,7 +12,7 @@ Term: Spring 2018
 + Team Number: 7
 + Team Members: Mao Guan, Nicole Smith, Michael Sheng, Kenny Warner, and Jessica Zhang. 
 + Project summary: In this project, we created a classification engine for images of dogs versus cats. ([main.Rmd](doc/main.Rmd))
-	+ Baseline model: GBM with SIFT features,  ___ % accuracy.
+	+ Baseline model: GBM with SIFT features,  36% accuracy.
 	+ Proposed model: XGBoost with HOG features, with 74% accuracy. 
 
 + Project details: We discussed several classification models including GBM, XGBoost, Random Forest, logistic regression, convolutional neural network (CNN), K-Nearest Neighbors, linear SVM, and RBF SVM. We also HOG and SIFT features on each of the models and compared the prediction error and computational time. 
@@ -23,7 +23,7 @@ Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by
 
 Classifier\Features | SIFT | HOG
 ---- | --- | ---
-Gradient Boosting(Baseline) | Accuracy:|  Accuracy:
+Gradient Boosting(Baseline) | Accuracy: 36% |  Accuracy: 70%
 CNN | Accuracy:|  Accuracy: 68%
 XGBoost | Accuracy:68%|  Accuracy:74%
 Random Forest |  Accuracy: 72% | Accuracy: 64% 
