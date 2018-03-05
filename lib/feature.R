@@ -2,9 +2,9 @@
 ### Construct visual features for training/testing images ###
 #############################################################
 
-### Authors: Yuting Ma/Tian Zheng
-### Project 3
-### ADS Spring 2017
+### Authors: Mao Guan, Michael Sheng, Nicole Smith, Kenny Warner, Jessica Zhang
+### Project 2
+### ADS Spring 2018
 
 feature <- function(img_dir, set_name, data_name="data", export=T){
   

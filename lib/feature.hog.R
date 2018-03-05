@@ -2,7 +2,7 @@
 ### Construct visual features for training/testing images ###
 #############################################################
 
-### Authors: Yuting Ma/Tian Zheng
+### Authors: Mao Guan, Michael Sheng, Nicole Smith, Kenny Warner, Jessica Zhang
 ### Project 3
 ### ADS Spring 2017
 
@@ -18,7 +18,6 @@ feature.hog <- function(img_dir, export=TRUE){
   library(EBImage)
   library(OpenImageR)
 
-  img_dir <- "../data/train/"
   dir_names <- list.files(img_dir)
   num_files <- length(list.files(img_dir))
   
@@ -32,16 +31,16 @@ feature.hog <- function(img_dir, export=TRUE){
   # store the HOG features
   H <- matrix(NA, num_files,length(h1)) 
 
-  hog_train <- for(i in 1:num_files){
+  for(i in 1:num_files){
     img <- readImage(paste0(img_dir, files[i]))
     H[i,] <- HOG(img,cells = 3, orientations = 6)
   }
   
   ### output constructed features
   if(export){
-    save(hog_train, file = paste0("../output/HOG.RData"))
+    save(H, file = paste0("../output/HOG.RData"))
   }
-  write.csv(hog_train, file = "../output/hog_features.csv", row.names = F)
+  write.csv(H, file = "../output/hog_features.csv", row.names = F)
 
-  return(hog_train)
+  return(H)
 }

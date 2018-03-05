@@ -2,9 +2,9 @@
 ### Cross Validation ###
 ########################
 
-### Author: Yuting Ma
-### Project 3
-### ADS Spring 2016
+### Author: Mao Guan, Michael Sheng, Nicole Smith, Kenny Warner, Jessica Zhang
+### Project 1
+### ADS Spring 2018
 
 
 cv.function <- function(X.train, y.train, d, K) {

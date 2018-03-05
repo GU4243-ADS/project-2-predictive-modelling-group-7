@@ -2,9 +2,9 @@
 ### Train a classification model with training images ###
 #########################################################
 
-### Author: Yuting Ma
-### Project 3
-### ADS Spring 2016
+### Author: Mao Guan, Michael Sheng, Nicole Smith, Kenny Warner, Jessica Zhang
+### Project 2
+### ADS Spring 2018
 
 
 train <- function(dat_train, label_train, par = NULL){
