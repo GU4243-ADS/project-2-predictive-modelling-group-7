@@ -9,6 +9,7 @@ library("cluster")
 library("reshape2")
 library("flexclust")
 library("gtools")
+library("gbm")
 ```
 
 ```{r feats}
@@ -19,10 +20,13 @@ source("../lib/train.R")
 labels <- read.csv("../data/train_label.txt",header=F)
 labels <- as.numeric(labels$V1)
 labels <- labels-1
-predict(fit_train$fit, newdata = dat_test, 
-                  n.trees = fit_train$iter, type = "response")
-system.time(gbm_sift <- gbm_train(sift_features[1:1800,],labels[1:1800]))
 
+system.time(gbm_sift <- gbm_train(sift_features[1:1800,],labels[1:1800]))
+labels
 source("../lib/test.R")
 gbm_test(gbm_sift,sift_features[1801:2000,])
+pred <- predict(gbm_sift$fit, newdata = sift_features[1801:2000,], 
+                  n.trees = gbm_sift$iter,type="response")
+pred_labels <- round(pred)
+sum(labels[1801:2000] - pred_labels == 0)/200
 ```
