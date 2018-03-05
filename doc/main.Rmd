@@ -1,6 +1,6 @@
 ---
 title: "xgboost"
-author: "Kenny Warner"
+author: "Group 7"
 date: "March 3, 2018"
 output: html_document
 ---
@@ -71,6 +71,42 @@ label <- read_csv(paste('../data/train_label.txt', sep=''),
                    col_names = c('label'))
 
 label <-ifelse(label$label == "dog", 1, 0) # binary classification, dog = 1, cat = 0. 
+
+```
+###Training and Testing Baseline Model (GBM)
+```{r}
+
+if (test.set == FALSE) {
+  library(gbm)
+  sift <- read.csv("../output/sift_features.csv")
+
+  # sift <- read.csv("../pets/train-features")
+
+  sift$label <- label
+
+  # Applying k-Fold Cross Validation
+  # install.packages('caret')
+  library(caret)
+
+  folds = createFolds(training_set$label, k = 10)
+  cv = lapply(folds, function(x) {
+    training_fold = training_set[-x, ]
+    test_fold = training_set[x, ]
+    gbm_train <- gbm.fit(x = training_fold[-55],
+                                    y = training_fold$label, 
+                                    n.trees = 1000,
+                                    distribution = "bernoulli",
+                                    interaction.depth = 3,
+                                    bag.fraction = 0.5,
+                                    verbose = FALSE)
+
+    y_pred = predict(gbm_train, newdata = test_fold[-55], n.trees = 1000)
+    y_pred = (y_pred >= 0.5)
+    cm = table(test_fold[, 55], y_pred)
+    accuracy = (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] + cm[1,2] + cm[2,1])
+    return(accuracy)
+  })
+  accuracy = mean(as.numeric(cv)) }
 
 ```
 
