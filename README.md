@@ -25,12 +25,12 @@ Classifier\Features | SIFT | HOG
 ---- | --- | ---
 Gradient Boosting(Baseline) | Accuracy:|  Accuracy:
 XGBoost | Accuracy:|  Accuracy:
-Random Forest |  Accuracy: | Accuracy:64% 
-SVM(Linear) | Accuracy: | Accuracy: 67%
-SVM(RBF) | Accuracy: | Accuracy: 67%
-Logistic Regression | Accuracy: | Accuracy:67% 
-kNN | Accuracy: | Accuracy:60%
-Multi-Layer-Perceptron| Accuracy: | Accuracy:67%
+Random Forest |  Accuracy: 72% | Accuracy: 64% 
+SVM(Linear) | Accuracy: 67% | Accuracy: 67%
+SVM(RBF) | Accuracy: 67% | Accuracy: 67%
+Logistic Regression | Accuracy: 67% | Accuracy: 67% 
+kNN | Accuracy: 70% | Accuracy: 60%
+Multi-Layer-Perceptron| Accuracy: 69% | Accuracy: 67%
 ```
 proj/
 ├── lib/
