@@ -52,9 +52,8 @@ tm_train<- system.time(gbm_train <- gbm.fit(x = training_set[-55],
                                   interaction.depth = 3))
 
 # Predicting the Test set results
-tm_test <- system.time(y_pred <- predict(gbm_train, newdata = as.matrix(test_set[-55])))
-y_pred <- (y_pred >= 0.5)
-
+gbm.pred <- predict(gbm_train, newdata = test_set[-55], n.trees = 1, distribution = "bernoulli", interaction.depth = 3)
+mean(gbm.pred)
 ```
 
 ```{r}
