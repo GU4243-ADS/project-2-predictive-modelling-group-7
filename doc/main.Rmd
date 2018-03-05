@@ -125,7 +125,7 @@ if (test.set == FALSE) {
   tm_test <- system.time(y_pred <- predict(bst, newdata = as.matrix(test_set[-55])))
   y_pred <- (y_pred >= 0.5)
 
-saveRDS(bst, "./xgboost_model.rds")}
+saveRDS(bst, "../output/xgboost_model.rds")}
   
 
 ```
@@ -134,7 +134,7 @@ saveRDS(bst, "./xgboost_model.rds")}
 ####Testing only on test set 
 
 if (test.set == TRUE) {
-  bst <- readRDS("./xgboost_model.rds")
+  bst <- readRDS("../output/xgboost_model.rds")
   test_set <- hog
   test_set$label <- label
   
