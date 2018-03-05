@@ -18,6 +18,7 @@ feature.hog <- function(img_dir, export=TRUE){
   library(EBImage)
   library(OpenImageR)
 
+  img_dir <- "../data/train/"
   dir_names <- list.files(img_dir)
   num_files <- length(list.files(img_dir))
   
